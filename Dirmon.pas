@@ -12,13 +12,24 @@ type
     memLog: TMemo;
     txtCurrentdir: TEdit;
     btnSelectDir: TButton;
+    grpNotify: TGroupBox;
+    chkFileAdd: TCheckBox;
+    chkFileRemoved: TCheckBox;
+    chkFileRenamed: TCheckBox;
+    chkFileModified: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnSelectDirClick(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
+    procedure chkFileAddClick(Sender: TObject);
+    procedure chkFileRemovedClick(Sender: TObject);
+    procedure chkFileRenamedClick(Sender: TObject);
+    procedure chkFileModifiedClick(Sender: TObject);
   private
     fDirMon: TDirectoryMonitor;
     fStarted: Boolean;
+    fAddAction, fRemoveAction, fModifyAction, fRenameAction: TActionToWatch;
+    procedure SetCheckBoxes;
     procedure DirChange(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: string);
   public
     { Public declarations }
@@ -64,6 +75,42 @@ begin
   end;
 end;
 
+//  TActionToWatch = (awChangeFileName, awChangeDirName, awChangeAttributes, awChangeSize, awChangeLastWrite,
+//                    awChangeLastAccess, awChangeCreation, awChangeSecurity);
+
+procedure TDirNotifyDemo.chkFileAddClick(Sender: TObject);
+begin
+  if chkFileAdd.Checked then
+    fDirMon.Actions := fDirMon.Actions + [fAddAction]
+  else
+    fDirMon.Actions := fDirMon.Actions - [fAddAction];
+end;
+
+procedure TDirNotifyDemo.chkFileRemovedClick(Sender: TObject);
+begin
+  if chkFileRemoved.Checked then
+    fDirMon.Actions := fDirMon.Actions + [fRemoveAction]
+  else
+    fDirMon.Actions := fDirMon.Actions - [fRemoveAction];
+end;
+
+procedure TDirNotifyDemo.chkFileRenamedClick(Sender: TObject);
+begin
+  if chkFileRenamed.Checked then     // OK
+    fDirMon.Actions := fDirMon.Actions + [fRenameAction]
+  else
+    fDirMon.Actions := fDirMon.Actions - [fRenameAction];
+end;
+
+procedure TDirNotifyDemo.chkFileModifiedClick(Sender: TObject);
+begin
+  if chkFileModified.Checked then
+    fDirMon.Actions := fDirMon.Actions + [fModifyAction]
+  else
+    fDirMon.Actions := fDirMon.Actions - [fModifyAction];
+
+end;
+
 procedure TDirNotifyDemo.DirChange(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: string);
 Const
   ActionDesc: Array [TDirectoryMonitorAction] Of String =
@@ -81,14 +128,28 @@ procedure TDirNotifyDemo.FormCreate(Sender: TObject);
 begin
   fDirMon := TDirectoryMonitor.Create;
   fDirMon.OnChange := DirChange;
-  fDirMon.Actions := [awChangeFileName, awChangeDirName, awChangeSize, awChangeLastWrite];
+  fDirMon.Actions := [awChangeFileName];
   txtCurrentdir.Text := TPath.GetDocumentsPath;
   fDirMon.Directory := txtCurrentdir.Text;
+  fAddAction    := awChangeCreation;
+  fRemoveAction := awChangeAttributes;
+  fModifyAction := awChangeLastWrite;
+  fRenameAction := awChangeFileName;
+  SetCheckBoxes;
+  btnStartClick(nil);
 end;
 
 procedure TDirNotifyDemo.FormDestroy(Sender: TObject);
 begin
   fDirMon.Free;
+end;
+
+procedure TDirNotifyDemo.SetCheckBoxes;
+begin
+  chkFileAdd.Checked      := fAddAction in fDirMon.Actions;
+  chkFileRemoved.Checked  := fRemoveAction in fDirMon.Actions;
+  chkFileModified.Checked := fModifyAction in fDirMon.Actions;
+  chkFileRenamed.Checked  := fRenameAction in fDirMon.Actions;
 end;
 
 end.

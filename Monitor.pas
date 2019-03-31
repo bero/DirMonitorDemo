@@ -1,4 +1,5 @@
 unit Monitor;
+// Based on https://www.osnews.com/story/7376/a-directory-monitor-class-for-delphi/
 
 interface
 
@@ -15,8 +16,7 @@ type
   TActionToWatch = (awChangeFileName, awChangeDirName, awChangeAttributes, awChangeSize, awChangeLastWrite,
     awChangeLastAccess, awChangeCreation, awChangeSecurity);
   TActionsToWatch = set of TActionToWatch;
-  TDirectoryMonitorAction = (daUnknown, daFileAdded, daFileRemoved, daFileModified, daFileRenamedOldName,
-    daFileRenamedNewName);
+  TDirectoryMonitorAction = (daUnknown, daFileAdded, daFileRemoved, daFileModified, daFileRenamedOldName, daFileRenamedNewName);
   TDirectoryChangeEvent = procedure(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: string) of object;
 
 const
